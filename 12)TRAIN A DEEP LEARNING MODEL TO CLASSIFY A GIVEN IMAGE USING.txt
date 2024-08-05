@@ -1,0 +1,78 @@
+import tensorflow as tf
+from tensorflow.keras.applications import VGG16 
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten, Dropout 
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.preprocessing.image import ImageDataGenerator 
+from google.colab import drive
+
+# Mount Google Drive
+drive.mount('/content/drive')
+
+# Define the data directory
+data_dir = '/content/drive/MyDrive/Collab'
+
+# Load the VGG16 model pre-trained on ImageNet, excluding the top layers
+vgg_model = VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3)) 
+
+# Freeze the layers of the VGG16 model
+for layer in vgg_model.layers:
+    layer.trainable = False 
+
+# Build the sequential model
+model = Sequential() 
+model.add(vgg_model) 
+model.add(Flatten())
+model.add(Dense(512, activation='relu')) 
+model.add(Dropout(0.5))
+model.add(Dense(256, activation='relu')) 
+model.add(Dropout(0.5))
+
+# Assuming binary classification, change num_classes to 2 for binary
+num_classes = 2
+model.add(Dense(num_classes, activation='softmax'))
+
+# Compile the model
+model.compile(optimizer=Adam(learning_rate=1e-4), loss='categorical_crossentropy', metrics=['accuracy']) 
+
+# Define directories for training and validation data
+train_data_dir = data_dir + '/train'
+validation_data_dir = data_dir + '/validation' 
+
+# Create data generators
+train_datagen = ImageDataGenerator(rescale=1./255) 
+test_datagen = ImageDataGenerator(rescale=1./255) 
+
+# Create data generators for training and validation
+train_generator = train_datagen.flow_from_directory(
+    train_data_dir, 
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical', # Use 'categorical' for multi-class classification 
+    shuffle=True
+)
+
+validation_generator = test_datagen.flow_from_directory(
+    validation_data_dir,
+    target_size=(224, 224), 
+    batch_size=32,
+    class_mode='categorical', # Use 'categorical' for multi-class classification 
+    shuffle=False
+)
+
+# Print class labels
+class_labels = train_generator.class_indices 
+print("Class labels:", class_labels)
+
+# Train the model
+model.fit(
+    train_generator,
+    steps_per_epoch=train_generator.samples // train_generator.batch_size, 
+    epochs=10, # Adjust the number of epochs as needed 
+    validation_data=validation_generator, 
+    validation_steps=validation_generator.samples // validation_generator.batch_size
+)
+
+# Evaluate the model on the validation data
+validation_loss, validation_accuracy = model.evaluate(validation_generator) 
+print("Validation Accuracy:", validation_accuracy)

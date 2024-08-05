@@ -1,0 +1,46 @@
+1)simple vector add in tensorflow
+
+
+import tensorflow as tf
+
+# Creating a scalar
+scalar = tf.constant(7)
+print("Scalar:", scalar)
+print("Scalar dimensions:", scalar.ndim)
+
+# Creating a vector
+vector = tf.constant([10, 10])
+print("Vector:", vector)
+print("Vector dimensions:", vector.ndim)
+
+# Creating a matrix
+matrix = tf.constant([[1, 2], [3, 4]])
+print("Matrix:\n", matrix)
+print("The number of dimensions of a matrix is:", matrix.ndim)
+
+# Creating two tensors (matrices)
+matrix1 = tf.constant([[1, 2], [3, 4]])
+matrix2 = tf.constant([[2, 4], [6, 8]])
+
+# Addition of two matrices
+print("Addition of two matrices:")
+print(matrix1 + matrix2)
+
+
+
+
+output:
+
+Scalar: tf.Tensor(7, shape=(), dtype=int32)
+Scalar dimensions: 0
+Vector: tf.Tensor([10 10], shape=(2,), dtype=int32)
+Vector dimensions: 1
+Matrix:
+ tf.Tensor(
+[[1 2]
+ [3 4]], shape=(2, 2), dtype=int32)
+The number of dimensions of a matrix is: 2
+Addition of two matrices:
+tf.Tensor(
+[[ 3  6]
+ [ 9 12]], shape=(2, 2), dtype=int32)
